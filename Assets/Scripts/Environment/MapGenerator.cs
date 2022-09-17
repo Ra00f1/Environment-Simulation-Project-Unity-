@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour
 {
-	public enum DrawMode { NoiseMap, ColourMap, Mesh };
+	public enum DrawMode { NoiseMap, ColourMap, Mesh , FallofMap};
 	public DrawMode drawMode;
 
 	public Noise.NormalizeMode normalizeMode;
@@ -24,6 +24,8 @@ public class MapGenerator : MonoBehaviour
 	public int seed;
 	public Vector2 offset;
 
+	public bool UsefallofMap;
+
 	public float meshHeightMultiplier;
 	public AnimationCurve meshHeightCurve;
 
@@ -31,10 +33,17 @@ public class MapGenerator : MonoBehaviour
 
 	public TerrainType[] regions;
 
+	float[,] fallofMap;
+
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
-	public void DrawMapInEditor()
+    private void Awake()
+    {
+        fallofMap = FallofGenerator.GenerateFallOfMap(mapChunkSize);
+    }
+
+    public void DrawMapInEditor()
 	{
 		MapData mapData = GenerateMapData(Vector2.zero);
 
@@ -50,6 +59,10 @@ public class MapGenerator : MonoBehaviour
 		else if (drawMode == DrawMode.Mesh)
 		{
 			display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, meshHeightMultiplier, meshHeightCurve, editorPreviewLOD), TextureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
+		}
+		else if (drawMode == DrawMode.FallofMap)
+		{
+			display.DrawTexture(TextureGenerator.TextureFromHeightMap(FallofGenerator.GenerateFallOfMap(mapChunkSize)));
 		}
 	}
 
@@ -119,6 +132,10 @@ public class MapGenerator : MonoBehaviour
 		{
 			for (int x = 0; x < mapChunkSize; x++)
 			{
+				if (UsefallofMap)
+				{
+					noiseMap[x, y] = Mathf.Clamp01(noiseMap[y, x] - fallofMap[x, y]);
+				}
 				float currentHeight = noiseMap[x, y];
 				for (int i = 0; i < regions.Length; i++)
 				{
@@ -146,6 +163,8 @@ public class MapGenerator : MonoBehaviour
 		{
 			octaves = 0;
 		}
+
+		fallofMap = FallofGenerator.GenerateFallOfMap(mapChunkSize);
 	}
 
 	struct MapThreadInfo<T>
