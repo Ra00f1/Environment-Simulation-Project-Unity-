@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour
 {
-
 	public enum DrawMode { NoiseMap, ColourMap, Mesh, FalloffMap };
 	public DrawMode drawMode;
 
@@ -129,8 +128,7 @@ public class MapGenerator : MonoBehaviour
 			meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
 		}
 	}
-
-	void Update()
+void Update()
 	{
 		if (mapDataThreadInfoQueue.Count > 0)
 		{
@@ -153,7 +151,6 @@ public class MapGenerator : MonoBehaviour
 
 	MapData GenerateMapData(Vector2 centre)
 	{
-
 		GenerateFalloffMap();
 
 		float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, noiseScale, octaves, persistance, lacunarity, centre + offset, normalizeMode);
@@ -184,9 +181,13 @@ public class MapGenerator : MonoBehaviour
 				}
 			}
 		}
-
-
-		return new MapData(noiseMap, colourMap);
+		// can't use here make a bool to make it once and in the updaye after this function.
+		RayCastSc[] rayCastSc = GameObject.FindObjectsOfType<RayCastSc>();
+		for (int i = 0; i < rayCastSc.Length; i++)
+        {
+			rayCastSc[i].Cast();
+        }
+        return new MapData(noiseMap, colourMap);
 	}
 
 	void OnValidate()

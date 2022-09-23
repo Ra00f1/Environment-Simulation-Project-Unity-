@@ -3,9 +3,13 @@ using System.Collections;
 
 public static class MeshGenerator
 {
+	static int avbsd;
+
 	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail, bool useFlatShading)
 	{
 		AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
+
+		TreeSpawner treeSpawner;
 
 		int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 
@@ -15,7 +19,6 @@ public static class MeshGenerator
 
 		float topLeftX = (meshSizeUnsimplified - 1) / -2f;
 		float topLeftZ = (meshSizeUnsimplified - 1) / 2f;
-
 
 		int verticesPerLine = (meshSize - 1) / meshSimplificationIncrement + 1;
 
@@ -63,12 +66,11 @@ public static class MeshGenerator
 					int d = vertexIndicesMap[x + meshSimplificationIncrement, y + meshSimplificationIncrement];
 					meshData.AddTriangle(a, d, c);
 					meshData.AddTriangle(d, a, b);
+					
 				}
-
 				vertexIndex++;
 			}
 		}
-
 		meshData.ProcessMesh();
 
 		return meshData;
