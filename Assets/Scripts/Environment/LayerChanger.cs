@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class LayerChanger : MonoBehaviour
 {
-    private int Layerint;
 
     void Start()
     {
-        Layerint = LayerMask.NameToLayer("Ground");
+        
     }
 
     // Update is called once per frame
@@ -16,7 +15,7 @@ public class LayerChanger : MonoBehaviour
     {
         foreach(Transform child in transform)
         {
-            child.gameObject.layer = Layerint;
+            child.gameObject.tag = "Ground";
         }
     }
 }

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class RaycastHitSorter : MonoBehaviour
 {
-    //List<GameObject>
-    // Start is called before the first frame update
+    public List<Vector3> Positions;
+    TreeSpawner treeSpawner;
     void Start()
     {
-        
+        treeSpawner = GameObject.FindObjectOfType<TreeSpawner>();
     }
 
     // Update is called once per frame
@@ -17,8 +17,12 @@ public class RaycastHitSorter : MonoBehaviour
         
     }
 
-    public void Sort(GameObject hits)
+    public void Sort(Vector3 position)
     {
-        //if(Hits.)
+        if (Positions.Contains(position) == false)
+        { 
+            Positions.Add(position);
+            treeSpawner.Spawntree(position);
+        }
     }
 }

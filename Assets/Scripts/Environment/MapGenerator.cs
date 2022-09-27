@@ -12,10 +12,13 @@ public class MapGenerator : MonoBehaviour
 	public Noise.NormalizeMode normalizeMode;
 
 	public bool useFlatShading;
+	[SerializeField] private bool GotTreePositions = false;
+	[SerializeField] private bool FinishedGenerating = false;
 
 	[Range(0, 6)]
 	public int editorPreviewLOD;
 	public float noiseScale;
+	
 
 	public int octaves;
 	[Range(0, 1)]
@@ -38,12 +41,16 @@ public class MapGenerator : MonoBehaviour
 	bool falloffMapGenerated;
 
 	static MapGenerator instance;
+	private RayCastSc[] rayCastSc;
 
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
-
-	void GenerateFalloffMap()
+    private void Start()
+    {
+		rayCastSc = GameObject.FindObjectsOfType<RayCastSc>();
+	}
+    void GenerateFalloffMap()
 	{
 		if (useFalloff && !falloffMapGenerated)
 		{
@@ -147,6 +154,16 @@ void Update()
 				threadInfo.callback(threadInfo.parameter);
 			}
 		}
+		else
+			FinishedGenerating = true;
+		if (GotTreePositions == false && FinishedGenerating == true)
+		{
+			GotTreePositions = true;
+			for (int i = 0; i < rayCastSc.Length; i++)
+			{
+				rayCastSc[i].Cast();
+			}
+		}
 	}
 
 	MapData GenerateMapData(Vector2 centre)
@@ -181,13 +198,9 @@ void Update()
 				}
 			}
 		}
-		// can't use here make a bool to make it once and in the updaye after this function.
-		RayCastSc[] rayCastSc = GameObject.FindObjectsOfType<RayCastSc>();
-		for (int i = 0; i < rayCastSc.Length; i++)
-        {
-			rayCastSc[i].Cast();
-        }
         return new MapData(noiseMap, colourMap);
+		// can't use here make a bool to make it once and in the updaye after this function.
+		
 	}
 
 	void OnValidate()
@@ -216,7 +229,6 @@ void Update()
 		}
 
 	}
-
 }
 
 [System.Serializable]

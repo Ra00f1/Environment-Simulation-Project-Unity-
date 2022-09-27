@@ -14,13 +14,19 @@ public class RayCastSc : MonoBehaviour
     public Color Color1;
     public Color Color2;
 
+    private RaycastHitSorter RaycastHitSorter;
+
     void Start()
+    {
+        layerMask = LayerMask.GetMask("Ground");
+        RaycastHitSorter = GameObject.FindObjectOfType<RaycastHitSorter>();
+    }
+    void FixedUpdate()
     {
     }
     public void Cast()
     {
         degerees = 360 / NumberOfRays;
-        layerMask = ~LayerMask.NameToLayer("Ground");
 
         for (int i = 0; i < NumberOfRays; i++)
         {
@@ -35,10 +41,39 @@ public class RayCastSc : MonoBehaviour
             RaycastHit hit;
             Direction = new Vector3(0, sin, cos);
 
-            if (Physics.Raycast(transform.position, Direction, out hit, Mathf.Infinity, layerMask))
+            if (Physics.Raycast(transform.position, Direction, out hit, Mathf.Infinity))
             {
-                Debug.DrawRay(transform.position, Direction * hit.distance, Color.yellow);
+                if(hit.transform.gameObject.tag == "Ground")
+                {
+                    Debug.DrawRay(transform.position, Direction * hit.distance, Color.yellow);
 
+                    MeshRenderer rend = hit.transform.GetComponent<MeshRenderer>();
+                    MeshCollider meshCollider = hit.collider as MeshCollider;
+
+                    if (rend == null || rend.sharedMaterial == null || rend.sharedMaterial.mainTexture == null || meshCollider == null)
+                        return;
+
+                    MeshRenderer renderer = hit.collider.GetComponent<MeshRenderer>();
+                    Texture2D texture2D = renderer.material.mainTexture as Texture2D;
+                    Vector2 pCoord = hit.textureCoord;
+                    pCoord.x *= texture2D.width;
+                    pCoord.y *= texture2D.height;
+
+                    Vector2 tiling = renderer.material.mainTextureScale;
+                    Color color = texture2D.GetPixel(Mathf.FloorToInt(pCoord.x * tiling.x), Mathf.FloorToInt(pCoord.y * tiling.y));
+                    if (color == Color1)
+                    {
+                        RaycastHitSorter.Sort(hit.transform.position);
+                    }
+                    if (color == Color2)
+                    {
+                        RaycastHitSorter.Sort(hit.transform.position);
+                    }
+                }
+            }
+            else
+            { 
+                Debug.DrawRay(transform.position, Direction * 2000, Color.white);
             }
         }
     }
